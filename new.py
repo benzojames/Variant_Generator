@@ -1,18 +1,8 @@
-"""
-Sometimes I ensure that variants are within specifications while making them.
-In 8+, however, I let variants be whatever, but only add them if they are
-within specifications. This is much easier to code, and can take on a simpler
-format, but will likely run more slowly as we will have to generate more
-variants before they randomly fit the specifications.
-"""
-
 from random import randint, choice, shuffle
 import numpy as np
 
-VARS_PER_LVL = 10
-
 def remove_indices(options, variant_list):
-    """Replace some indices in a list with None
+    """Replace some indices in a list with None.
 
     If the variants in a level can have different missing variables, then we
     want to have at most three questions with the same missing variable in a
@@ -34,7 +24,7 @@ def remove_indices(options, variant_list):
     missing *= max_repeats
     shuffle(missing)
     # once maximums have been satisfied, repeat
-    missing += missing[:VARS_PER_LVL - len(missing)]
+    missing += missing[:10 - len(missing)]
 
     for i, item in enumerate(variant_list):
         # variant_list may be filled with zipped objects
@@ -52,13 +42,13 @@ def repeat_list(input_list, minimum):
     '''
     We need to see all values in B exactly minimum times before we can repeat
     them any further. Once this condition has been satisfied repeat the list
-    until it has VARS_PER_LVL values.
-    This value takes the values in B and returns a shuffled list of length VARS_PER_LVL
+    until it has 10 values.
+    This value takes the values in B and returns a shuffled list of length 10
     that satisfies the above repetition condition.
     '''
     lst = input_list * minimum
     shuffle(lst)
-    lst += lst[:VARS_PER_LVL - len(lst)]
+    lst += lst[:10 - len(lst)]
     return lst
 
 def comm_unique(left, right, result, variants):
@@ -82,7 +72,7 @@ def mult_variants_from_list(input_list, minimum, low=1, high=10, zeros=0, keep_p
     before we see any numbers in input_list more than minimum times
     '''
     variants = []
-    while len(variants) != VARS_PER_LVL:
+    while len(variants) != 10:
         ''' NOTE:
         reset see once all values are used
         when reset occurs, this could lead to at most 4 questions
@@ -92,7 +82,7 @@ def mult_variants_from_list(input_list, minimum, low=1, high=10, zeros=0, keep_p
         more than minimum times.
         '''
         to_see = input_list * minimum
-        while to_see and len(variants) != VARS_PER_LVL:
+        while to_see and len(variants) != 10:
             factor_right = choice(to_see)
             to_see.remove(factor_right)
 
@@ -123,20 +113,21 @@ def ab_count(num, variants):
     return result
 
 def repeat_shuffle_fill(lst, num):
+    '''This can help with min_before_repeat conditions.'''
     output = lst * num
     shuffle(output)
-    mult = VARS_PER_LVL//len(output) + 1
+    mult = 10//len(output) + 1
     output *= mult
-    return output[:VARS_PER_LVL]
+    return output[:10]
 
 def lvl1(operation):
     variants = []
 
     if operation == '+':
         # range functions helps ensure our variants will be diverse
-        addend_left_list = range(VARS_PER_LVL)
+        addend_left_list = range(10)
         addend_right_list = [10 - i for i in addend_left_list]
-        variants = list(zip(addend_left_list, addend_right_list, [10] * VARS_PER_LVL))
+        variants = list(zip(addend_left_list, addend_right_list, [10] * 10))
         shuffle(variants)
 
         # by default either A or B is missing
@@ -146,7 +137,7 @@ def lvl1(operation):
         ''' NOTE:
         0 - 0 is currently possible
         '''
-        # subtrahend_list = list(range(VARS_PER_LVL))
+        # subtrahend_list = list(range(10))
         # minuend_list = [randint(subtrahend, 10) for subtrahend in subtrahend_list]
         # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
 
@@ -154,7 +145,7 @@ def lvl1(operation):
         # shuffle(variants)
         # variants = remove_indices('ABC', variants)
         CZeros = 2
-        for subtrahend in range(VARS_PER_LVL):
+        for subtrahend in range(10):
             # possible this will cause a repetition
             minuend = randint(subtrahend + (0 if CZeros else 1), 10)
             difference = minuend - subtrahend
@@ -231,7 +222,7 @@ def lvl2(operation):
         floor = 0
         ceil = 20
 
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             ''' NOTE:
             this does not allow for same A, B, C even if different missing index
             '''
@@ -253,7 +244,7 @@ def lvl2(operation):
         """ NOTE:
         currenly can have B=2 or B=12 not both
         """
-        # subtrahend_list = [i + choice((0, 10)) for i in range(VARS_PER_LVL)]
+        # subtrahend_list = [i + choice((0, 10)) for i in range(10)]
         # minuend_list = [randint(max(subtrahend, 11), 20) for subtrahend in subtrahend_list]
         # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
 
@@ -305,7 +296,7 @@ def lvl3(operation):
         zeros = 2
         floor = 0
 
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             addend1 = 10 * randint(2, 9)
             addend2 = choice((randint(floor, 9), 10 * randint(1, 10 - addend1 / 10)))
             summation = addend1 + addend2
@@ -346,7 +337,7 @@ def lvl3(operation):
         factor_left_list = list(range(10))
         shuffle(factor_left_list)
 
-        variants = list(zip(factor_left_list, factor_right_list, VARS_PER_LVL * [None]))
+        variants = list(zip(factor_left_list, factor_right_list, 10 * [None]))
 
     elif operation in (':', '/'):
         divisor_list = repeat_list([3, 6, 9], 3)
@@ -380,7 +371,7 @@ def lvl4(operation):
         addend1_list = list(range(1, 10))*2
         shuffle(addend1_list)
 
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             addend1 = addend1_list.pop()
 
             while True:
@@ -400,7 +391,7 @@ def lvl4(operation):
 
         # zeros = 2
 
-        # while len(variants) != VARS_PER_LVL:
+        # while len(variants) != 10:
         #     addend1 = 10 * randint(2, 9) + randint(1, 8)
         #     # b = randint(0 if zeros else 1, 9 - a%10)
         #     addend2 = randint(1, 9 - addend1%10)
@@ -417,7 +408,7 @@ def lvl4(operation):
         ''' NOTE:
         I have currently allowed for b = 0 once
         '''
-        # subtrahend_list = list(range(VARS_PER_LVL))
+        # subtrahend_list = list(range(10))
         # minuend_list = [10 * randint(2, 9) + randint(sub, 9) for sub in subtrahend_list]
         # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
 
@@ -427,7 +418,7 @@ def lvl4(operation):
 
         same_digit = 2
         # reversed means we will see 9 first which aviods crossover issues
-        for subtrahend in reversed(range(VARS_PER_LVL)):
+        for subtrahend in reversed(range(10)):
             minu_digit = randint(subtrahend + (0 if same_digit else 1), 9)
             if minu_digit == subtrahend:
                 same_digit -= 1
@@ -438,13 +429,13 @@ def lvl4(operation):
         variants = remove_indices('ABC', variants)
 
     elif operation == '*':
-        variants = list(zip(range(VARS_PER_LVL), [7] * VARS_PER_LVL, [None] * VARS_PER_LVL))
+        variants = list(zip(range(10), [7] * 10, [None] * 10))
         shuffle(variants)
 
     elif operation in (':', '/'):
         divisor = 7
-        dividend_list = [divisor * i for i in range(VARS_PER_LVL)]
-        variants = list(zip(dividend_list, [divisor] * VARS_PER_LVL, [None] * VARS_PER_LVL))
+        dividend_list = [divisor * i for i in range(10)]
+        variants = list(zip(dividend_list, [divisor] * 10, [None] * 10))
         shuffle(variants)
 
     return variants
@@ -453,7 +444,7 @@ def lvl5(operation):
     variants = []
 
     if operation == '+':
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             addend1 = randint(2, 9)
             addend2 = 10 * randint(1, 8) + randint(11 - addend1, 9)
             summation = addend1 + addend2
@@ -466,7 +457,7 @@ def lvl5(operation):
 
 
 
-        # while len(variants) != VARS_PER_LVL:
+        # while len(variants) != 10:
         #     addend1 = 10 * randint(1, 8) + randint(1, 9)
         #     addend2 = randint(10 - addend1%10, 9)
         #     summation = addend1 + addend2
@@ -479,7 +470,7 @@ def lvl5(operation):
         # variants = remove_indices('ABC', variants)
 
     elif operation == '-':
-        subtrahend_list = list(range(2, VARS_PER_LVL))
+        subtrahend_list = list(range(2, 10))
         minuend_list = [10 * randint(2, 9) + randint(1, sub - 1) for sub in subtrahend_list]
         difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
 
@@ -504,7 +495,7 @@ def lvl5(operation):
         # # There is a zero in A or this would be 3
         # zeros = 2
         # floor = 0
-        # factor_left_list = list(range(VARS_PER_LVL))
+        # factor_left_list = list(range(10))
 
         # for factor_left in factor_left_list:
         #     while True:
@@ -541,7 +532,7 @@ def lvl5(operation):
 
     elif operation in (':', '/'):
         '''NOTE: needs spec fix'''
-        divisor_list = list(range(1, VARS_PER_LVL + 1))
+        divisor_list = list(range(1, 10 + 1))
         dividend_list = [div * randint(1, 10) for div in divisor_list]
         variants = list(zip(dividend_list, divisor_list, [None] * 10))
         shuffle(variants)
@@ -567,7 +558,7 @@ def lvl6(operation):
         # this time zeros are found in one-units of a 2 digit number twice
         zeros = 2
 
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             addend1 = 10 * randint(1, 8) + randint(1, 9)
             addend2 = 10 * randint(1, 9 - addend1//10)
             summation = addend1 + addend2
@@ -586,11 +577,11 @@ def lvl6(operation):
     elif operation == '-':
         # awkward
         same_digit = 2
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             minu_digit = randint(1, 9)
             minuend = 10 * randint(2, 9) + minu_digit
             # at least one subtrahend has a zero unit
-            if len(variants) < VARS_PER_LVL - 1:
+            if len(variants) < 10 - 1:
                 sub_digit = randint(1, minu_digit)
                 if minu_digit == sub_digit:
                     if same_digit:
@@ -611,7 +602,7 @@ def lvl6(operation):
 
     elif operation == '*':
         # under_ten_ok = 2
-        # for factor_left in range(VARS_PER_LVL):
+        # for factor_left in range(10):
         #     while True:
         #         if factor_left == 0:
         #             factor_right = randint(1, 10)
@@ -649,7 +640,7 @@ def lvl6(operation):
 
     elif operation in (':', '/'):
         '''NOTE: needs spec fix'''
-        divisor_list = list(range(1, VARS_PER_LVL + 1))
+        divisor_list = list(range(1, 10 + 1))
         dividend_list = [divisor * randint(1, 10) for divisor in divisor_list]
         quotient_list = [i//j for i, j in zip(dividend_list, divisor_list)]
 
@@ -663,7 +654,7 @@ def lvl7(operation):
     variants = []
 
     if operation == '+':
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             addend_left = 10 * randint(1, 7) + randint(1, 9)
             addend_right = 10 * randint(1, 8 - addend_left//10) + randint(10 - addend_left%10, 9)
 
@@ -673,7 +664,7 @@ def lvl7(operation):
         variants = remove_indices('ABC', variants)
 
     elif operation == '-':
-        # temp = list(range(1, VARS_PER_LVL)) + [randint(1, 9)]
+        # temp = list(range(1, 10)) + [randint(1, 9)]
         # subtrahend_list = [10 * randint(1, 8) + i for i in temp]
         # minuend_list = [10 * randint(sub//10 + 1, 9) + randint(1, sub%10) for sub in subtrahend_list]
         # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
@@ -705,7 +696,7 @@ def lvl7(operation):
         factor_left_mults = [1] * 3 + [10] * 3 + [100] * 4
         shuffle(factor_left_mults)
         factor_left_mults = factor_left_mults[:8]
-        factor_left_list = [0, 1] + [choice(factor_left_mults) * i for i in range(2, VARS_PER_LVL)]
+        factor_left_list = [0, 1] + [choice(factor_left_mults) * i for i in range(2, 10)]
         # while True:
         #     factor_left = choice((1, 10, 100)) * randint(1, 9)
         #     if factor_left not in factor_left_list:
@@ -741,7 +732,7 @@ def lvl7(operation):
 
     elif operation in (':', '/'):
         '''NOTE: looks completely new :( '''
-        divisor_list = [choice((1, 10)) * i for i in range(1, VARS_PER_LVL)]
+        divisor_list = [choice((1, 10)) * i for i in range(1, 10)]
         while True:
             divisor = choice((1, 10)) * randint(1, 9)
             if divisor not in divisor_list:
@@ -790,7 +781,7 @@ def lvl8(operation):
                 variants.append(possibly_commuted)
                 break
 
-        while len(variants) != VARS_PER_LVL:
+        while len(variants) != 10:
             addend1 = 100 * randint(1, 10)
             addend2 = choice((10, 100)) * randint(1, 9)
             if addend2 < 100:
@@ -825,7 +816,7 @@ def lvl8(operation):
         shuffle(variants)
         variants = remove_indices('ABC', variants)
 
-        # while len(variants) != VARS_PER_LVL:
+        # while len(variants) != 10:
         #     minuend = 100 * randint(2, 10)
         #     subtrahend = choice((10 * randint(1, 9), 100 * randint(1, minuend / 100 - 1)))
 
@@ -837,7 +828,7 @@ def lvl8(operation):
 
 
     elif operation == '*':
-        factor_left_list = [choice((1, 10, 100)) * i for i in range(VARS_PER_LVL)]
+        factor_left_list = [choice((1, 10, 100)) * i for i in range(10)]
         for factor_left in factor_left_list:
             while True:
                 if factor_left == 0:
@@ -861,7 +852,7 @@ def lvl8(operation):
         variants = remove_indices('AB', variants)
 
     elif operation in (':', '/'):
-        divisor_list = [choice((1, 10)) * i for i in range(1, VARS_PER_LVL)]
+        divisor_list = [choice((1, 10)) * i for i in range(1, 10)]
         while True:
             divisor = choice((1, 10)) * randint(1, 9)
             if divisor not in divisor_list:
@@ -929,7 +920,7 @@ def lvl9(operation):
         variants = remove_indices('ABC', variants)
 
         # bothHunLeft = 2
-        # while len(variants) != VARS_PER_LVL:
+        # while len(variants) != 10:
         #     # usually X00
         #     addend1 = 100 * randint(1, 8) + np.random.choice((0, 10), p=(.7, .3)) * randint(1, 9)
         #     # usually XY0
@@ -953,7 +944,7 @@ def lvl9(operation):
         # ''' NOTE:
         # I've avoided B tens higher than A tens completely
         # '''
-        # while len(variants) != VARS_PER_LVL:
+        # while len(variants) != 10:
         #     minuend = 100 * randint(1, 9) + 10 * randint(1, 8)
         #     subtrahend = 100 * randint(0, minuend//100 - 1) + 10 * randint((minuend%100)//10 + 1, 9)
         #     variant = [minuend, subtrahend, minuend - subtrahend]
@@ -1041,7 +1032,7 @@ def lvl10(operation):
     variants = []
 
     if operation == '+':
-        #     while len(variants) != VARS_PER_LVL:
+        #     while len(variants) != 10:
         #         addend1 = choice((100, 1000)) * randint(10, 99)
         #         addend2 = choice((10, 100, 1000)) * randint(10, 99)
 
@@ -1149,7 +1140,7 @@ def lvl10(operation):
         variants = remove_indices('ABC', variants)
 
     elif operation == '-':
-        # while len(variants) != VARS_PER_LVL:
+        # while len(variants) != 10:
         #     minuend = choice((100, 1000)) * randint(10, 99)
         #     subtrahend = choice((10, 100, 1000) if minuend//1000 else (10, 100)) * randint(1, 99)
 
@@ -1219,27 +1210,27 @@ def lvl10(operation):
 
         variants = remove_indices('ABC', variants)
 
-        tps = [1, 10, 100, 1000]
-        mult10_divisor_list = [1] * 2 + [10] * 3 + [100] + 3 + [1000] * 2
-        mult10_dividend_list = tps[2:] + tps[1:] + tps[:3] + tps[:2]
-        #mult_divisor_list = [randint(1, 9)] + list(range(1, 10))
+        # tps = [1, 10, 100, 1000]
+        # mult10_divisor_list = [1] * 2 + [10] * 3 + [100] + 3 + [1000] * 2
+        # mult10_dividend_list = tps[2:] + tps[1:] + tps[:3] + tps[:2]
+        # #mult_divisor_list = [randint(1, 9)] + list(range(1, 10))
 
-        # want some randomness but cant shuffle mult lists
-        mult_index_list = list(range(10))
-        shuffle(mult_index_list)
+        # # want some randomness but cant shuffle mult lists
+        # mult_index_list = list(range(10))
+        # shuffle(mult_index_list)
 
-        mult_divisor_list = []
-        for mult in mult10_divisor_list:
+        # mult_divisor_list = []
+        # for mult in mult10_divisor_list:
             
 
-        while mult_index_list:
-            index = mult10_index_list.pop()
-            mult10_divisor = mult10_divisor_list[index]
-            mult10_dividend = mult10_dividend_list[index]
-            mult_divisor = mult_divisor_list.pop()
-            # need to use all items in mult_index_list
-            while True:
-                divisor = mult_divisor * mult10_divisor
+        # while mult_index_list:
+        #     index = mult10_index_list.pop()
+        #     mult10_divisor = mult10_divisor_list[index]
+        #     mult10_dividend = mult10_dividend_list[index]
+        #     mult_divisor = mult_divisor_list.pop()
+        #     # need to use all items in mult_index_list
+        #     while True:
+        #         divisor = mult_divisor * mult10_divisor
 
 
 
@@ -1263,20 +1254,22 @@ def make_output():
     # completed =
     for level in range(1, 11):
         for operation in ['+', '-', '*', ':']:
-            output.write(str(level) + ' ' + str(operation) + '\n')
+            sep = str(level) + ' ' + operation
+            output.write(sep + '\n')
+
             contents = []
-            # generate VARS_PER_LVL variants for a level
-            for dummy_variant in range(VARS_PER_LVL):
-                # the VARS_PER_LVL variants should be unique
+
+            # generate 10 example levels
+            while len(contents) < 10:
+                # the 10 variants should be unique
                 # how unique?
-                while True:
-                    lvl = level_maker(level, operation)
-                    if str(lvl) not in contents:
-                        if len(lvl) != 10:
-                            print('Level ' + str(level) + ' ' + operation + ' not full')
-                        contents.append(str(lvl))
-                        output.write(str(lvl) + '\n')
-                        break
+                lvl = level_maker(level, operation)
+                if str(lvl) not in contents:
+                    if len(lvl) != 10:
+                        print('Level ' + sep + ' length is ' + str(len(lvl)))
+                    contents.append(str(lvl))
+                    output.write(str(lvl) + '\n')
+            output.write('\n')
     output.close()
 
 make_output()
