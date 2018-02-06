@@ -1,0 +1,7 @@
+Need to set a list of conditions that can be looped through:
+Eg
+1) min 3 n multiples
+2) min 3 k multiples
+3) shuffle
+4) new min 3 n multiples -- check previous
+5) new min 3 k multiples -- check previous
