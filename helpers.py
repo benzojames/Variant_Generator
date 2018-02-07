@@ -67,44 +67,44 @@ def comm_choice(left, right, result):
     '''Returns L R res or R L res'''
     return choice(([left, right, result], [right, left, result]))
  
-def mult_variants_from_list(input_list, minimum, low=1, high=10, zeros=0, keep_product=True):
-    '''
-    input_list is a list of numbers, we want to see each number in input_list exactly minimum times
-    before we see any numbers in input_list more than minimum times
-    '''
-    variants = []
-    while len(variants) != 10:
-        ''' NOTE:
-        reset see once all values are used
-        when reset occurs, this could lead to at most 4 questions
-        in a row that share a multiplicant
+# def mult_variants_from_list(input_list, minimum, low=1, high=10, zeros=0, keep_product=True):
+#     '''
+#     input_list is a list of numbers, we want to see each number in input_list exactly minimum times
+#     before we see any numbers in input_list more than minimum times
+#     '''
+#     variants = []
+#     while len(variants) != 10:
+#         ''' NOTE:
+#         reset see once all values are used
+#         when reset occurs, this could lead to at most 4 questions
+#         in a row that share a multiplicant
  
-        We want to see all values in inputs minimum times before we see any of them
-        more than minimum times.
-        '''
-        to_see = input_list * minimum
-        while to_see and len(variants) != 10:
-            factor_right = choice(to_see)
-            to_see.remove(factor_right)
+#         We want to see all values in inputs minimum times before we see any of them
+#         more than minimum times.
+#         '''
+#         to_see = input_list * minimum
+#         while to_see and len(variants) != 10:
+#             factor_right = choice(to_see)
+#             to_see.remove(factor_right)
  
-            while True:
-                if factor_right == 0:
-                    factor_left = randint(max(low, 1), high)
-                else:
-                    factor_left = randint(0 if zeros > 0 else max(low, 1), high)
-                product = factor_left * factor_right
-                if not (factor_left in input_list and factor_left not in to_see):
-                    if comm_unique(factor_left, factor_right, product, variants):
-                        break
+#             while True:
+#                 if factor_right == 0:
+#                     factor_left = randint(max(low, 1), high)
+#                 else:
+#                     factor_left = randint(0 if zeros > 0 else max(low, 1), high)
+#                 product = factor_left * factor_right
+#                 if not (factor_left in input_list and factor_left not in to_see):
+#                     if comm_unique(factor_left, factor_right, product, variants):
+#                         break
  
-            if factor_left == 0:
-                zeros -= 1
-            if factor_left in to_see:
-                to_see.remove(factor_left)
-            # is the product/sum set to None?
-            variants.append([factor_left, factor_right, product if keep_product else None])
+#             if factor_left == 0:
+#                 zeros -= 1
+#             if factor_left in to_see:
+#                 to_see.remove(factor_left)
+#             # is the product/sum set to None?
+#             variants.append([factor_left, factor_right, product if keep_product else None])
  
-    return variants
+#     return variants
  
 def ab_count(num, variants):
     '''Check how many times we have used a left or right addend/factor... already'''

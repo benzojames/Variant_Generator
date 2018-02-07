@@ -6,7 +6,7 @@ from helpers import *
  
 # I dont bother doing anything if only one index is ever removed
 def ADD1():
-    ''' GOOD
+    ''' NOTE: GOOD
         Conditions:
         A + B = 10;
         A = 0 to 9
@@ -21,7 +21,7 @@ def ADD1():
     return variants, 'AB'
  
 def SUB1():
-    ''' NOTE: 0 - 0 is currently possible '''
+    ''' NOTE: ... '''
     variants = []
     # subtrahend_list = list(range(10))
     # minuend_list = [randint(subtrahend, 10) for subtrahend in subtrahend_list]
@@ -103,7 +103,7 @@ def DIV1():
     return list(zip(dividend_list, divisor_list, [None] * 10)), 'C'
  
 def ADD2():
-    ''' GOOD
+    ''' NOTE: GOOD
     A in [0, 20]
     B in [0, 20]
     A + B in [11, 20]
@@ -553,8 +553,9 @@ def ADD7():
     ''' NOTE: GOOD '''
     variants = []
     while len(variants) != 10:
-        addend_left = 10 * randint(1, 7) + randint(1, 9)
-        addend_right = 10 * randint(1, 8 - addend_left//10) + randint(10 - addend_left%10, 9)
+        add_left_ones = randint(2, 9)
+        addend_left = 10 * randint(1, 7) + add_left_ones
+        addend_right = 10 * randint(1, 8 - addend_left//10) + randint(11 - add_left_ones, 9)
         summation = addend_left + addend_right
  
         variant = [addend_left, addend_right, summation]
@@ -670,27 +671,31 @@ def DIV7():
     return variants, 'C'
  
 def ADD8():
-    '''NOTE: not sure '''
+    '''NOTE: GOOD
+    algo specifies we can have XY0 + A00 but examples don't have this
+    i"m going with examples
+    '''
     variants = []
     # will satisfy in (100, 1000)
     variants.append(comm_choice(100 * randint(1, 9), randint(1, 9), None))
  
-    while True:
-        # will satisfy in (100, 1000)
-        possibly_commuted = comm_unique(100 * randint(1, 9), randint(1, 9), None, variants)
+    while len(variants) < 2:
+        hun_multiple = 100 * randint(1, 9)
+        under_10 = randint(1, 9)
+
+        possibly_commuted = comm_unique(hun_multiple, under_10, None, variants)
         if possibly_commuted:
             variants.append(possibly_commuted)
-            break
  
     while len(variants) != 10:
         addend1 = choice((10, 100)) * randint(1, 9)
         addend2 = choice((10, 100)) * randint(1, 9)
         if addend2 < 100:
-            addend2 += randint(1, 9)
+            addend2 += randint(0, 9)
         summation = addend1 + addend2
  
         possibly_commuted = comm_unique(addend1, addend2, None, variants)
-        if all((100 < summation < 1000, addend2 < addend1, possibly_commuted)):
+        if possibly_commuted and 100 < summation < 1000:
             variants.append(possibly_commuted)
  
     shuffle(variants)
@@ -785,43 +790,66 @@ def ADD9variant_check(a, b, c):
     # don't add 2 multiples of 100
     if a%100 == 0 and b%100 == 0:
         return False
- 
+
+def ADD9type1():
+    # multiples of 10 (but not 100) that add to a 100 multiple
+    addend1 = 100 * randint(1, 8) + 10 * randint(1, 9)
+    addend2 = 100 * randint(1, 9 - addend1//100) + (10 - addend1%10)
+    return addend1, addend2, addend1 + addend2
+def ADD9type2():
+    # A is a hundred multiple and B is a ten multiple (not a hundred multiple)
+    addend1 = 100 * randint(1, 8)
+    addend2 = 100 * randint(1, 9 - addend1//100) + 10 * randint(1, 9)
+    return addend1, addend2, addend1 + addend2
+def ADD9type3():
+    # A and B ten mult but not hun mult
+    addend1 = 100 * randint(1, 8) + 10 * randint(1, 9)
+    addend2 = 100 * randint(1, 9 - addend1//100) + 10 * randint(1, 9)
+    summation = addend1 + addend2
+    return addend1, addend2, summation
 def ADD9():
-    ''' NOTE
+    ''' NOTE: GOOD
     should b < 100 be possible?
     examples say OK
     PROBABLY NOT
     '''
     variants = []
-    # three multiples of 10 (but not 100) that add to a 100 multiple
-    while len(variants) != 3:
-        addend1 = 100 * randint(1, 8) + 10 * randint(1, 9)
-        addend2 = 100 * randint(1, 9 - addend1//100) + (10 - addend1%10)
-        summation = addend1 + addend2
+    # three of condition 1
+    while len(variants) < 3:
+        addend1, addend2, summation = ADD9type1()
+        possibly_commuted = comm_unique(addend1, addend2, summation, variants)
+        if possibly_commuted and summation%100 == 0 and 200 < summation < 1000:
+            variants.append(possibly_commuted)
+
+    # three of condition 2
+    while len(variants) < 6:
+        addend1, addend2, summation = ADD9type2()
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
         if possibly_commuted and 200 < summation < 1000:
             variants.append(possibly_commuted)
-    # another 3 where A is a hundred multiple and b is a ten multiple (not a hundred multiple)
-    while len(variants) != 6:
-        addend1 = 100 * randint(1, 8)
-        addend2 = 100 * randint(1, 9 - addend1//100) + 10 * randint(1, 9)
-        summation = addend1 + addend2
- 
+
+    # three of condition 3
+    while len(variants) < 9:
+        addend1, addend2, summation = ADD9type3()
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
         if possibly_commuted and 200 < summation < 1000:
             variants.append(possibly_commuted)
- 
-    # the rest can be a mixture
-    while len(variants) != 10:
-        addend1 = 100 * randint(1, 8) + 10 * randint(1, 9)
-        addend2 = 100 * randint(1, 9 - addend1//100) + 10 * randint(1, 9)
-        summation = addend1 + addend2
- 
+    
+    # to satisfy min_before_repeat condition last variant must have same condition as first
+    temp = list(enumerate(variants))
+    shuffle(temp)
+    variants = [enm[1] for enm in temp]
+    choices = [ADD9type1, ADD9type2, ADD9type3]
+    selection = choices[temp[0][0]//3]
+    while len(variants) < 10:
+        # addend1 = 100 * randint(1, 8) + 10 * randint(1, 9)
+        # addend2 = 100 * randint(1, 9 - addend1//100) + 10 * randint(1, 9)
+        # summation = addend1 + addend2
+        addend1, addend2, summation = selection()
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
         if possibly_commuted and 200 < summation < 1000:
             variants.append(possibly_commuted)
      
-    shuffle(variants)
     return variants, 'ABC'
  
     # bothHunLeft = 2
@@ -934,6 +962,9 @@ def DIV9():
     return variants, 'AC'
  
 def ADD10():
+    ''' NOTE: GOOD
+        The way the specs are laid out min_before_repeat would not make sense
+    '''
     #     while len(variants) != 10:
     #         addend1 = choice((100, 1000)) * randint(10, 99)
     #         addend2 = choice((10, 100, 1000)) * randint(10, 99)
@@ -950,28 +981,29 @@ def ADD10():
  
     # not currently spacing variants
     variants = []
-    no_hundreds = 0
-    h_crossovers = 0
-    t_crossovers = 0
-    both_crossovers = 0
-    while no_hundreds != 2:
+    once_hundred = 2
+    h_crossovers = 2
+    t_crossovers = 2
+    both_crossovers = 3
+
+    while once_hundred:
         hun_mult1 = randint(2, 9)
-        ten_mult1 = randint(1, 9)
+        ten_mult1 = randint(2, 9)
         hun_mult2 = 0
-        ten_mult2 = randint(1, 9)
+        ten_mult2 = randint(11 - ten_mult1, 9)
         addend1 = 100 * hun_mult1 + 10 * ten_mult1
         addend2 = 100 * hun_mult2 + 10 * ten_mult2
         summation = addend1 + addend2
-        if summation <= 300:
-            continue
+
         possibly_commuted = comm_unique(addend1, addend2, addend1 + addend2, variants)
-        if possibly_commuted:
+        if possibly_commuted and 300 < summation < 2000:
             variants.append(possibly_commuted)
-            no_hundreds += 1
-            if ten_mult1 + ten_mult2 > 10:
-                t_crossovers += 1
+            once_hundred -= 1
+            # dont need to track this
+            # if ten_mult1 + ten_mult2 > 10:
+            #     t_crossovers -= 1
      
-    while both_crossovers < 3:
+    while both_crossovers:
         hun_mult1 = randint(2, 9)
         ten_mult1 = randint(2, 9)
         hun_mult2 = randint(11 - hun_mult1, 9)
@@ -979,12 +1011,13 @@ def ADD10():
         addend1 = 100 * hun_mult1 + 10 * ten_mult1
         addend2 = 100 * hun_mult2 + 10 * ten_mult2
         summation = addend1 + addend2
+
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-        if possibly_commuted:
+        if possibly_commuted and 300 < summation < 2000:
             variants.append(possibly_commuted)
-            both_crossovers += 1
+            both_crossovers -= 1
  
-    while h_crossovers < 2:
+    while h_crossovers:
         hun_mult1 = randint(2, 9)
         ten_mult1 = randint(1, 8)
         hun_mult2 = randint(11 - hun_mult1, 9)
@@ -992,12 +1025,13 @@ def ADD10():
         addend1 = 100 * hun_mult1 + 10 * ten_mult1
         addend2 = 100 * hun_mult2 + 10 * ten_mult2
         summation = addend1 + addend2
+
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-        if possibly_commuted:
+        if possibly_commuted and 300 < summation < 2000:
             variants.append(possibly_commuted)
-            h_crossovers += 1
+            h_crossovers -= 1
  
-    while t_crossovers < 2:
+    while t_crossovers:
         hun_mult1 = randint(1, 8)
         ten_mult1 = randint(2, 9)
         hun_mult2 = randint(1, 9 - hun_mult1)
@@ -1005,11 +1039,11 @@ def ADD10():
         addend1 = 100 * hun_mult1 + 10 * ten_mult1
         addend2 = 100 * hun_mult2 + 10 * ten_mult2
         summation = addend1 + addend2
-        if 300 < summation and summation < 1000:
-            possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-            if possibly_commuted:
-                variants.append([addend1, addend2, summation])
-                t_crossovers += 1
+
+        possibly_commuted = comm_unique(addend1, addend2, summation, variants)
+        if possibly_commuted and 300 < summation < 1000:
+            variants.append([addend1, addend2, summation])
+            t_crossovers -= 1
  
     while len(variants) != 10:
         if choice((True, False)):
@@ -1021,10 +1055,10 @@ def ADD10():
             addend1 = 100 * hun_mult1 + 10 * ten_mult1
             addend2 = 100 * hun_mult2 + 10 * ten_mult2
             summation = addend1 + addend2
-            if 300 < summation and summation < 1000:
-                possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-                if possibly_commuted:
-                    variants.append(possibly_commuted)
+
+            possibly_commuted = comm_unique(addend1, addend2, summation, variants)
+            if possibly_commuted and 300 < summation < 1000:
+                variants.append(possibly_commuted)
  
         else:
             # 100 crossover
@@ -1035,8 +1069,9 @@ def ADD10():
             addend1 = 100 * hun_mult1 + 10 * ten_mult1
             addend2 = 100 * hun_mult2 + 10 * ten_mult2
             summation = addend1 + addend2
+
             possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-            if possibly_commuted:
+            if possibly_commuted and 300 < summation < 2000:
                 variants.append(possibly_commuted)
  
     shuffle(variants)
