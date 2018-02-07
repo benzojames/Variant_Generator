@@ -21,15 +21,9 @@ def ADD1():
     return variants, 'AB'
  
 def SUB1():
-    ''' NOTE: ... '''
+    ''' NOTE: GOOD '''
     variants = []
-    # subtrahend_list = list(range(10))
-    # minuend_list = [randint(subtrahend, 10) for subtrahend in subtrahend_list]
-    # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
- 
-    # variants = list(zip(minuend_list, subtrahend_list, difference_list))
-    # shuffle(variants)
-    # variants = remove_indices('ABC', variants)
+
     CZeros = 2
     for subtrahend in range(10):
         while True:
@@ -48,6 +42,7 @@ def SUB1():
             if variant not in variants:
                 variants.append([minuend, subtrahend, difference])
                 break
+
     shuffle(variants)
     return variants, 'ABC'
  
@@ -132,19 +127,16 @@ def ADD2():
     return variants, 'ABC'
  
 def SUB2():
-    """ NOTE:
+    """ NOTE: GOOD
     currenly can have B=2 or B=12 not both
     """
     variants = []
-    # subtrahend_list = [i + choice((0, 10)) for i in range(10)]
-    # minuend_list = [randint(max(subtrahend, 11), 20) for subtrahend in subtrahend_list]
-    # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
- 
-    # variants = list(zip(minuend_list, subtrahend_list, difference_list))
     over_one = list(range(2, 10))
     shuffle(over_one)
+    # these are unique so variants will be unique
     subtrahend_list = [0, 1] + over_one
-    # min 4 crossovers
+
+    # min 4 crossovers (need subtrahend at least 2)
     while len(variants) < 4:
         subtrahend = subtrahend_list.pop()
         minuend = randint(11, 9 + subtrahend)
@@ -154,12 +146,13 @@ def SUB2():
     CZeros = 1
     for temp_sub in subtrahend_list:
         subtrahend = temp_sub + choice((0, 10))
-        # might cause repition
         minuend = randint(max(subtrahend + (0 if CZeros else 1), 11), 20)
         difference = minuend - subtrahend
         if difference == 0:
             CZeros -= 1
+
         variants.append([minuend, subtrahend, difference])
+
     shuffle(variants)
     return variants, 'ABC'
  
@@ -224,6 +217,7 @@ def ADD3():
     return variants, 'ABC'
  
 def SUB3():
+    ''' NOTE: GOOD '''
     variants = []
     # subtrahend <= 80 (need difference >= 20)
     subtrahend_list = [i * choice((1, 10)) for i in range(1, 8)] + [8, 9]
@@ -232,8 +226,9 @@ def SUB3():
     for subtrahend in subtrahend_list:
         while True:
             minuend = 10 * randint(max(3, subtrahend / 10), 10)
-            if [minuend, subtrahend, minuend - subtrahend] not in variants:
-                variants.append([minuend, subtrahend, minuend - subtrahend])
+            variant = [minuend, subtrahend, minuend - subtrahend]
+            if variant not in variants:
+                variants.append(variant)
                 break
  
     shuffle(variants)
@@ -314,27 +309,23 @@ def ADD4():
     # variants = remove_indices('ABC', variants)
  
 def SUB4():
-    ''' NOTE:
-    I have currently allowed for b = 0 once
+    ''' NOTE: GOOD
+    I ignored the condition that A >= 21 and used A >= 20 instead
     '''
     variants = []
-    # subtrahend_list = list(range(10))
-    # minuend_list = [10 * randint(2, 9) + randint(sub, 9) for sub in subtrahend_list]
-    # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
- 
-    # variants = list(zip(minuend_list, subtrahend_list, difference_list))
-    # shuffle(variants)
-    # variants = remove_indices('ABC', variants)
- 
     same_digit = 2
-    # reversed means we will see 9 first which aviods crossover issues
+
+    # reversed means we will see 9 first which avoids crossover issues
+    # range(10) ensures variants will be unique
     for subtrahend in reversed(range(10)):
         minu_digit = randint(subtrahend + (0 if same_digit else 1), 9)
         if minu_digit == subtrahend:
             same_digit -= 1
+
         minuend = 10 * randint(2, 9) + minu_digit
         difference = minuend - subtrahend
         variants.append([minuend, subtrahend, difference])
+
     shuffle(variants)
     return variants, 'ABC'
  
@@ -376,6 +367,7 @@ def ADD5():
     # variants = remove_indices('ABC', variants)
  
 def SUB5():
+    '''NOTE: GOOD'''
     subtrahend_list = list(range(2, 10))
     minuend_list = [10 * randint(2, 9) + randint(1, sub - 1) for sub in subtrahend_list]
     difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
@@ -473,20 +465,24 @@ def ADD6():
     return variants, 'ABC'
  
 def SUB6():
+    '''NOTE: GOOD'''
     # awkward
     variants = []
     same_digit = 2
     while len(variants) != 10:
         minu_digit = randint(1, 9)
         minuend = 10 * randint(2, 9) + minu_digit
+
         # at least one subtrahend has a zero unit
-        if len(variants) < 10 - 1:
+        if len(variants) < 9:
             sub_digit = randint(1, minu_digit)
+
             if minu_digit == sub_digit:
                 if same_digit:
                     same_digit -= 1
                 else:
                     continue
+
             subtrahend = 10 * randint(1, minuend//10 - 1) + sub_digit
         else:
             subtrahend = 10 * randint(1, minuend//10 - 1)
@@ -495,7 +491,7 @@ def SUB6():
         if variant not in variants:
             variants.append(variant)
  
-    # shuffle in the zero one digit variant
+    # shuffle in the zero subtrahend digit variant
     shuffle(variants)
     return variants, 'ABC'
  
@@ -565,22 +561,21 @@ def ADD7():
     return variants, 'ABC'
  
 def SUB7():
-    # temp = list(range(1, 10)) + [randint(1, 9)]
-    # subtrahend_list = [10 * randint(1, 8) + i for i in temp]
-    # minuend_list = [10 * randint(sub//10 + 1, 9) + randint(1, sub%10) for sub in subtrahend_list]
-    # difference_list = [i - j for i, j in zip(minuend_list, subtrahend_list)]
-    # variants = list(zip(minuend_list, subtrahend_list, difference_list))
- 
-    # algorithm forces appearance of X0 - Y0 ...
-    # also makes X1 - Y1 50% likely (in my implementation)
-    # have a lot of AB - XY where B is small, i could force larger tho when Y is big
+    ''' NOTE: GOOD
+        always have X0 - Y0
+        50% of the time have X1 - Y1
+        :/
+        have a lot of AB - XY where B is small, i could force larger tho when Y is big
+    '''
     variants = []
     same_digit = 2
+    # range ensures uniqueness of variants
     for sub_digit in range(10):
         subtrahend = 10 * randint(1, 8) + sub_digit
         minu_digit = randint(0, sub_digit - (0 if same_digit else 1))
         if minu_digit == sub_digit:
             same_digit -= 1
+
         minuend = 10 * randint(subtrahend//10 + 1, 9) + minu_digit
         variants.append([minuend, subtrahend, minuend - subtrahend])
  
@@ -702,37 +697,42 @@ def ADD8():
     return variants, 'C'
  
 def SUB8():
-    variants = []
+    '''NOTE: GOOD'''
+    CND1 = []
     # 4 where 100|A, 10|B, B < 100
-    while len(variants) != 4:
+    while len(CND1) != 4:
         minuend = 100 * randint(2, 9)
         subtrahend = 10 * randint(1, 9)
-        add_if_unique([minuend, subtrahend, minuend-subtrahend], variants)
- 
-    # 4 where 100|(A and B)
-    while len(variants) != 8:
-        minu_mult = randint(2, 9)
-        minuend = 100 * minu_mult
-        subtrahend = 100 * randint(1, minu_mult - 1)
-        add_if_unique([minuend, subtrahend, minuend-subtrahend], variants)
- 
+        difference = minuend - subtrahend
+        if 100 < difference <= 1000:
+            add_if_unique([minuend, subtrahend, difference], CND1)
+
     hun_sub = 100 * randint(2, 9)
-    variants.append([1000, hun_sub, 1000 - hun_sub])
+    CND1.append([1000, hun_sub, 1000 - hun_sub])
+    shuffle(CND1)
+
+    CND2 = []
+    # 4 where 100|(A and B)
+    while len(CND2) != 8:
+        minu_huns = randint(2, 9)
+        minuend = 100 * minu_huns
+        subtrahend = 100 * randint(1, minu_huns - 1)
+        if 100 < difference <= 1000:
+            add_if_unique([minuend, subtrahend, difference], CND2)
+ 
     ten_sub = 10 * randint(1, 9)
-    variants.append([1000, ten_sub, 1000-ten_sub])
- 
+    CND2.append([1000, ten_sub, 1000 - ten_sub])
+    shuffle(CND2)
+
+
+    variants = CND1[:3] + CND2[:3]
     shuffle(variants)
+    # to satisfy min_before_repeat
+    if choice((True, False)):
+        variants = [CND1.pop(), CND2.pop()] + variants + [CND1.pop(), CND2.pop()]
+    else:
+        variants = [CND2.pop(), CND1.pop()] + variants + [CND2.pop(), CND1.pop()]
     return variants, 'ABC'
- 
-    # while len(variants) != 10:
-    #     minuend = 100 * randint(2, 10)
-    #     subtrahend = choice((10 * randint(1, 9), 100 * randint(1, minuend / 100 - 1)))
- 
-    #     variant = [minuend, subtrahend, minuend - subtrahend]
-    #     if variant not in variants:
-    #         variants.append(variant)
- 
-    # variants = remove_indices('ABC', variants)
  
 def MUL8():
     variants = []
@@ -873,56 +873,52 @@ def ADD9():
     # shuffle(variants)
     # variants = remove_indices('ABC', variants)
  
+def SUB9type1():
+    m_huns = randint(1, 10)
+    m_tens = randint(1, 8)
+    s_huns = 0
+    s_tens = randint(m_tens + 1, 9)
+    minuend = 100 * m_huns + 10 * m_tens
+    subtrahend = 10 * s_tens
+    return [minuend, subtrahend, minuend - subtrahend]
+def SUB9type2():
+    m_huns = randint(2, 10)
+    m_tens = 0
+    s_huns = randint(1, m_huns - 1)
+    s_tens = randint(1, 9)
+    minuend = 100 * m_huns
+    subtrahend = 100 * s_huns + 10 * s_tens
+    return [minuend, subtrahend, minuend-subtrahend]
+def SUB9type3():
+    m_huns = randint(1, 10)
+    m_tens = randint(2, 9)
+    s_huns = randint(1, m_huns)
+    s_tens = randint(1, m_tens - 1)
+    minuend = 100 * m_huns + 10 * m_tens
+    subtrahend = 100 * s_huns + 10 * s_tens
+    return [minuend, subtrahend, minuend-subtrahend]
 def SUB9():
-    # ''' NOTE:
-    # I've avoided B tens higher than A tens completely
-    # '''
-    # while len(variants) != 10:
-    #     minuend = 100 * randint(1, 9) + 10 * randint(1, 8)
-    #     subtrahend = 100 * randint(0, minuend//100 - 1) + 10 * randint((minuend%100)//10 + 1, 9)
-    #     variant = [minuend, subtrahend, minuend - subtrahend]
- 
-    #     if variant not in variants:
-    #         variants.append(variant)
- 
-    # variants = remove_indices('ABC', variants)
- 
-    # Extra condition 1 for now because I liked that best
+    '''NOTE: GOOD'''
     variants = []
-    while len(variants) < 4:
-        m_huns = randint(1, 10)
-        m_tens = randint(1, 8)
-        s_huns = 0
-        s_tens = randint(m_tens + 1, 9)
-        minuend = 100 * m_huns + 10 * m_tens
-        subtrahend = 10 * s_tens
-        variant = [minuend, subtrahend, minuend - subtrahend]
-        if variant not in variants:
-            variants.append(variant)
+    while len(variants) < 3:
+        variant = SUB9type1()
+        add_if_unique(variant, variants)
      
-    while len(variants) < 7:
-        m_huns = randint(2, 10)
-        m_tens = 0
-        s_huns = randint(1, m_huns - 1)
-        s_tens = randint(1, 9)
-        minuend = 100 * m_huns
-        subtrahend = 100 * s_huns + 10 * s_tens
-        variant = [minuend, subtrahend, minuend-subtrahend]
-        if variant not in variants:
-            variants.append(variant)
- 
-    while len(variants) < 10:
-        m_huns = randint(1, 10)
-        m_tens = randint(2, 9)
-        s_huns = randint(1, m_huns)
-        s_tens = randint(1, m_tens - 1)
-        minuend = 100 * m_huns + 10 * m_tens
-        subtrahend = 100 * s_huns + 10 * s_tens
-        variant = [minuend, subtrahend, minuend-subtrahend]
-        if variant not in variants:
-            variants.append(variant)
+    while len(variants) < 6:
+        variant = SUB9type2()
+        add_if_unique(variant, variants)
+
+    while len(variants) < 9:
+        variant = SUB9type3()
+        add_if_unique(variant, variants)
      
     shuffle(variants)
+
+    # last variant
+    while len(variants) != 10:
+        var_type = choice((SUB9type1, SUB9type2, SUB9type3))
+        add_if_unique(var_type(), variants)
+
     return variants, 'ABC'
  
 def MUL9():
@@ -1100,7 +1096,7 @@ def SUB10():
  
     while len(variants) != 10:
         m_huns = randint(5, 20)
-        m_tens = randint(0 if m_huns >= 11 else 1, 8)
+        m_tens = randint(0 if (m_huns >= 11) else 1, 8)
         s_huns = randint(1, min(m_huns - 1, 15))
         s_tens = randint(m_tens + 1, 9)
         minuend = 100 * m_huns + 10 * m_tens
@@ -1213,10 +1209,14 @@ def make_output():
                 if not check_unique(lvl):
                     print(sep + ' variant uniqueness issue!!!')
  
-                ## CHECK [0, 0, 0]
                 for variant in lvl:
+                    ## CHECK [0, 0, 0]
                     if variant[:2].count(0) > 1:
                         print(sep + ' too many AB zeros!!!')
+
+                    ## CHECK negative result
+                    if operation == '-' and (variant[0] - variant[1] < 0):
+                        print(sep + ' negative result!!!')
  
                 ## CHECK one None index
                 lvl = remove_indices(missing_index, lvl)
