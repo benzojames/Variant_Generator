@@ -164,6 +164,10 @@ def rand_repeated_index(arr):
 
     print('rand_repeated_index didnt fint anything')
 
-
+def inner_tuples_to_lists(arr):
+    output = []
+    for item in arr:
+        output.append(list(item))
+    return output
 
 
