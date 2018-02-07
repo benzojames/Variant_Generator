@@ -39,18 +39,19 @@ def remove_indices(options, variant_list):
         variants.append(variant)
     return variants
  
-def repeat_list(input_list, minimum):
-    '''
-    We need to see all values in B exactly minimum times before we can repeat
-    them any further. Once this condition has been satisfied repeat the list
-    until it has 10 values.
-    This value takes the values in B and returns a shuffled list of length 10
-    that satisfies the above repetition condition.
-    '''
-    lst = input_list * minimum
-    shuffle(lst)
-    lst += lst[:10 - len(lst)]
-    return lst
+# use repeat_shuffle_fill
+# def repeat_list(input_list, minimum):
+#     '''
+#     We need to see all values in B exactly minimum times before we can repeat
+#     them any further. Once this condition has been satisfied repeat the list
+#     until it has 10 values.
+#     This value takes the values in B and returns a shuffled list of length 10
+#     that satisfies the above repetition condition.
+#     '''
+#     lst = input_list * minimum
+#     shuffle(lst)
+#     lst += lst[:10 - len(lst)]
+#     return lst
  
 def comm_unique(left, right, result, variants):
     '''
@@ -130,3 +131,39 @@ def check_unique(variants):
         if variants.count(variant) != 1:
             return False
     return True
+
+def satisfy_pow10_table(table):
+    '''Needs to be a square table'''
+    val_count = 0
+    size = len(table)
+    for row in table: val_count += sum(row)
+    
+    while val_count > 10:
+        row = randint(0, size - 1)
+        col = randint(0, size - 1)
+        if table[row][col] > 1:
+            table[row][col] -= 1
+            val_count -= 1
+
+    left, right = [], []
+    for row_index, row in enumerate(table):
+        for col_index, val in enumerate(row):
+            left += val * [10**row_index]
+            right += val * [10**col_index]
+
+    return left, right
+
+def rand_repeated_index(arr):
+    '''index of a repeated value or a message is printed'''
+    indices = list(range(len(arr)))
+    while indices:
+        index = indices.pop()
+        value = arr[index]
+        if arr.count(value) > 1:
+            return index
+
+    print('rand_repeated_index didnt fint anything')
+
+
+
+

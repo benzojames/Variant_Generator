@@ -46,23 +46,16 @@ def SUB1():
     shuffle(variants)
     return variants, 'ABC'
  
+# should I avoid left mult in [1,2,5,10]?
 def MUL1():
-    #variants = mult_variants_from_list([1, 2, 5, 10], minimum=2, keep_product=False)
-    # factor_right_list = repeat_shuffle_fill([1,2,5,10], 2)
-    # variants.append([0, factor_right_list.pop(), None])
-    # while len(variants) != 10:
-    #     factor_right = factor_right_list.pop()
- 
-    #     # every factor in factor_right_list must be used
-    #     while True:
-    #         factor_left = randint(1, 9)
-    #         variant = [factor_left, factor_right, None]
-    #         if variant not in variants:
-    #             variants.append(variant)
-    #             break
+    '''NOTE: GOOD
+        didnt need to make left factors unique but I did
+    '''
     factor_right_list = repeat_shuffle_fill([1,2,5,10], 2)
     factor_left_list = list(range(11))
     shuffle(factor_left_list)
+
+    # want one left factor of 0
     if factor_left_list[-1] != 0:
         factor_left_list.pop()
     else:
@@ -70,8 +63,9 @@ def MUL1():
     return list(zip(factor_left_list, factor_right_list, [None] * 10)), 'C'
      
 def DIV1():
+    '''NOTE:GOOD'''
     # zeros = 2
-    # divisor_list = repeat_list([1, 2, 5, 10], 2)
+    # divisor_list = repeat_shuffle_fill([1, 2, 5, 10], 2)
  
     # for divisor in divisor_list:
     #     while True:
@@ -83,19 +77,30 @@ def DIV1():
     #             if dividend == 0:
     #                 zeros -= 1
     #             break
-    temp = [1,2,5,10]
-    divisor_list = repeat_shuffle_fill(temp, 2)
-    temp.remove(1)
-    if divisor_list[-2] == 1:
-        divisor_list[-2] = choice(temp)
-    if divisor_list[-1] == 1:
-        divisor_list[-1] = choice(temp)
- 
-    quotient_list = list(range(11))
-    shuffle(quotient_list)
-    quotient_list.pop()
-    dividend_list = [i*j for i, j in zip(quotient_list, divisor_list)]
-    return list(zip(dividend_list, divisor_list, [None] * 10)), 'C'
+
+    while True:
+        temp = [1,2,5,10]
+        divisor_list = repeat_shuffle_fill(temp, 2)
+        temp.remove(1)
+        if divisor_list[-2] == 1:
+            switch = choice(temp)
+            divisor_list[-2] = switch
+            # otherwise min_before_repeat is broken
+            divisor_list[0], divisor_list[divisor_list.index(switch)] = divisor_list[divisor_list.index(switch)], divisor_list[0]
+        if divisor_list[-1] == 1:
+            switch = choice(temp)
+            divisor_list[-1] = switch
+            divisor_list[0], divisor_list[divisor_list[2:].index(switch)] = divisor_list[divisor_list[2:].index(switch)], divisor_list[0]
+    
+        if divisor_list.count(1) > 2:
+            print('DIV1 has too many 1s!!!')
+            continue
+
+        quotient_list = list(range(11))
+        shuffle(quotient_list)
+        quotient_list.pop()
+        dividend_list = [i * j for i, j in zip(quotient_list, divisor_list)]
+        return list(zip(dividend_list, divisor_list, [None] * 10)), 'C'
  
 def ADD2():
     ''' NOTE: GOOD
@@ -157,30 +162,30 @@ def SUB2():
     return variants, 'ABC'
  
 def MUL2():
-    # while True:
-    #     variants = mult_variants_from_list([0, 4, 8], minimum=3, zeros=1, keep_product=False), 'C'
-    #     if check_unique(variants):
-    #         return variants
-     
+    '''NOTE: GOOD
+    I dont repeat left factors.'''
     variants = []
     factor_right_list = repeat_shuffle_fill([0, 4, 8], 3)
     while True:
+        # need a left factor of 0 but don't want 0 * 0
         non_zero_index = randint(0, 9)
         if factor_right_list[non_zero_index] != 0:
             break
+
     factor_left_list = list(range(1, 10))
     for i in range(10):
         if i == non_zero_index:
-            if i != 9:
-                factor_left_list.append(factor_left_list[i])
+            # still want to see whatever was at index i
+            if i != 9:  factor_left_list.append(factor_left_list[i])
             variants.append([0, factor_right_list[i], None])
         else:
             variants.append([factor_left_list[i], factor_right_list[i], None])
+
     return variants, 'C'
  
 def DIV2():
+    '''NOTE:GOOD'''
     variants = []
-    #divisor_list = repeat_list([4, 8], 3)
     divisor_list = repeat_shuffle_fill([4, 8], 3)
  
     for divisor in divisor_list:
@@ -189,6 +194,7 @@ def DIV2():
             if variant not in variants:
                 variants.append(variant)
                 break
+
     # want dividend = 0 once
     variants[randint(0, 9)][0] = 0
     return variants, 'C'
@@ -235,26 +241,26 @@ def SUB3():
     return variants, 'ABC'
  
 def MUL3():
-    #variants = mult_variants_from_list([3, 6, 9], minimum=3, zeros=2, keep_product=False)
-    # examples imply having 6 * 9 and 9 * 6 is ok
-    factor_right_list = [3, 6, 9] * 3
-    shuffle(factor_right_list)
-    factor_right_list += [factor_right_list[0]]
+    ''' NOTE: GOOD
+        didnt need to make left factors unique but I did'''
+    factor_right_list = repeat_shuffle_fill([3,6,9], 3)
  
     factor_left_list = list(range(10))
     shuffle(factor_left_list)
     return list(zip(factor_left_list, factor_right_list, [None] * 10)), 'C'
  
 def DIV3():
+    '''NOTE:GOOD'''
     variants = []
-    divisor_list = repeat_list([3, 6, 9], 3)
- 
+    divisor_list = repeat_shuffle_fill([3, 6, 9], 3)
+    
     for divisor in divisor_list:
         while True:
             variant = [divisor * randint(1, 10), divisor, None]
             if variant not in variants:
                 variants.append(variant)
                 break
+
     # want dividend = 0 once
     variants[randint(0, 9)][0] = 0
     return variants, 'C'
@@ -330,11 +336,13 @@ def SUB4():
     return variants, 'ABC'
  
 def MUL4():
+    ''' NOTE: GOOD '''
     variants = list(zip(range(10), [7] * 10, [None] * 10))
     shuffle(variants)
     return variants, 'C'
  
 def DIV4():
+    '''NOTE:GOOD'''
     divisor = 7
     dividend_list = [divisor * i for i in range(10)]
     variants = list(zip(dividend_list, [divisor] * 10, [None] * 10))
@@ -383,64 +391,51 @@ def SUB5():
  
     return variants, 'ABC'
  
+# is there a reason the new exampled have so many 6s?
 def MUL5():
-    # ''' NOTE:
-    # 0*0 possible in this version
-    # '''
-    # # There is a zero in A or this would be 3
-    # zeros = 2
-    # floor = 0
-    # factor_left_list = list(range(10))
- 
-    # for factor_left in factor_left_list:
-    #     while True:
-    #         factor_right = randint(floor, 10)
-    #         if comm_unique(factor_left, factor_right, None, variants):
-    #             variants.append([factor_left, factor_right, None])
-    #             if factor_right == 0:
-    #                 zeros -= 1
-    #                 if zeros == 0:
-    #                     floor = 1
-    #             break
- 
-    # shuffle(variants)
- 
-    # restart if 0 * 0 shows up
+    '''NOTE: GOOD'''
     while True:
         # seems to want to avoid three of same factor on a side
         factor_right_list = list(range(11))
         shuffle(factor_right_list)
         factor_right_list = factor_right_list[:10]
-        factor_left_list = list(range(10)) + list(range(1, 10))
+
+        factor_left_list = 2 * list(range(1, 10))
         shuffle(factor_left_list)
         factor_left_list = factor_left_list[:10]
+        # need one left factor of 0
+        factor_left_list[randint(0, 9)] = 0
  
         if 0 in factor_right_list:
             zero_index = factor_right_list.index(0)
+            # restart if A = B = 0
             if factor_left_list[zero_index] == 0:
                 continue
         else:
             return list(zip(factor_left_list, factor_right_list, [None] * 10)), 'C'
  
 def DIV5():
-    '''NOTE: didn't bother with quotient list'''
-    divisor_list = list(range(1, 10 + 1))
-    dividend_list = [div * randint(1, 10) for div in divisor_list]
-    variants = list(zip(dividend_list, divisor_list, [None] * 10))
-    shuffle(variants)
-    return variants, 'C'
+    ''' NOTE: GOOD
+        only use 2 and 3 as divisors once to satisfy MAX twice in [12, 30)
+    '''
+    # divisor_list = list(range(1, 10 + 1))
+    # dividend_list = [div * randint(1, 10) for div in divisor_list]
+    # variants = list(zip(dividend_list, divisor_list, [None] * 10))
+    # shuffle(variants)
+    # return variants, 'C'
  
     # needs discussion
-    # divisor_list = list(range(1, 11))
-    # for divisor in divisor_list:
-    #     if divisor == 1:
-    #         divident = divisor * randint(12//divisor + 1, 10)
-    #         variants.append([divident, divisor, None])
-    #     elif divisor == 3:
-    #         dividend = 30
-    #     else:
-    #         dividend = divisor * randint(30//divisor, 10)
-    #     variants.append([dividend, divisor, None])
+    variants = [[2 * randint(6, 9), 2, None], [3 * randint(4, 9), 3, None]]
+    divisor_list = repeat_shuffle_fill(list(range(4, 10)), 2)
+    for divisor in divisor_list[:8]:
+        while True:
+            dividend = divisor * randint(30//divisor + 1, 10)
+
+            variant = [dividend, divisor, None]
+            if variant not in variants:
+                variants.append(variant)
+                break
+    return variants, 'C'
  
 def ADD6():
     ''' NOTE: GOOD '''
@@ -496,53 +491,42 @@ def SUB6():
     return variants, 'ABC'
  
 def MUL6():
-    # under_ten_ok = 2
-    # for factor_left in range(10):
-    #     while True:
-    #         if factor_left == 0:
-    #             factor_right = randint(1, 10)
-    #         elif under_ten_ok:
-    #             factor_right = randint(0, 10)
+    ''' NOTE: GOOD '''
+    # while True:
+    #     # seems to want to avoid three of same factor on a side
+    #     factor_right_list = list(range(11))
+    #     shuffle(factor_right_list)
+    #     factor_right_list = factor_right_list[:10]
+ 
+    #     factor_left_list = list(range(10)) + list(range(1, 10))
+    #     shuffle(factor_left_list)
+    #     factor_left_list = factor_left_list[:10]
+ 
+    #     if 0 in factor_right_list:
+    #         zero_index = factor_right_list.index(0)
+    #         if factor_left_list[zero_index] == 0:
+    #             continue
+    #     else:
+    #         product_list = (i * j for i, j in zip(factor_left_list, factor_right_list))
+    #         variants = list(zip(factor_left_list, factor_right_list, product_list))
+ 
+    #         # i was having uniqueness issues
+    #         if check_unique(variants):
+    #             return variants, 'AB'
     #         else:
-    #             factor_right = randint(int(np.ceil(10 / factor_left)), 10)
- 
-    #         if comm_unique(factor_left, factor_right, factor_left * factor_right, variants):
-    #             variants.append([factor_left, factor_right, factor_left * factor_right])
-    #             if factor_left * factor_right < 10:
-    #                 under_ten_ok -= 1
-    #             break
-    while True:
-        # seems to want to avoid three of same factor on a side
-        factor_right_list = list(range(11))
-        shuffle(factor_right_list)
-        factor_right_list = factor_right_list[:10]
- 
-        factor_left_list = list(range(10)) + list(range(1, 10))
-        shuffle(factor_left_list)
-        factor_left_list = factor_left_list[:10]
- 
-        if 0 in factor_right_list:
-            zero_index = factor_right_list.index(0)
-            if factor_left_list[zero_index] == 0:
-                continue
-        else:
-            product_list = (i * j for i, j in zip(factor_left_list, factor_right_list))
-            variants = list(zip(factor_left_list, factor_right_list, product_list))
- 
-            # i was having uniqueness issues
-            if check_unique(variants):
-                return variants, 'AB'
-            else:
-                return MUL6()
+    #             return MUL6()
+    variants = []
+    missing_result_variants, _ = MUL5()
+    for variant in missing_result_variants:
+        variants.append([variant[0], variant[1], variant[0] * variant[1]])
+    return variants, 'AB'
  
 def DIV6():
-    '''NOTE: needs spec fix'''
-    divisor_list = list(range(1, 10 + 1))
-    dividend_list = [divisor * randint(1, 10) for divisor in divisor_list]
-    quotient_list = [i//j for i, j in zip(dividend_list, divisor_list)]
- 
-    variants = list(zip(dividend_list, divisor_list, quotient_list))
-    shuffle(variants)
+    '''NOTE:GOOD'''
+    variants = []
+    missing_result_variants, _ = DIV5()
+    for variant in missing_result_variants:
+        variants.append([variant[0], variant[1], variant[0]/variant[1]])
     return variants, 'AB'
  
 def ADD7():
@@ -581,55 +565,98 @@ def SUB7():
  
     shuffle(variants)
     return variants, 'ABC'
- 
+
+
 def MUL7():
-    ''' NOTE: 
-    currently no restrictions on numbers of 100 mults, 10 mults, ...
- 
-    ALSO
-    problem with unique variants
+    ''' NOTE: check
     '''
     variants = []
-    # for last entry, a in hundreds or ones could cause uniqueness issues
-    factor_left_mults = [1] * 3 + [10] * 3 + [100] * 4
-    shuffle(factor_left_mults)
-    factor_left_mults = factor_left_mults[:8]
-    factor_left_list = [0, 1] + [choice(factor_left_mults) * i for i in range(2, 10)]
-    # while True:
-    #     factor_left = choice((1, 10, 100)) * randint(1, 9)
-    #     if factor_left not in factor_left_list:
-    #         factor_left_list.append(factor_left)
-    #         break
- 
-    for factor_left in factor_left_list:
+    mult_pow10_arr = [  [0,2,2],
+                        [2,3,choice((0, 1))],
+                        [2,0,0]]
+    factor_left_10mults, factor_right_10mults = satisfy_pow10_table(mult_pow10_arr)
+    
+    # need a left factor of 0
+    factor_left_10mults[rand_repeated_index(factor_left_10mults)] = 0
+    
+    # need a left factor of 1
+    factor_left_10mults[rand_repeated_index(factor_left_10mults)] = None
+
+    factor_left_list = []
+    factor_right_list = []
+    for i in range(10):
         while True:
-            if factor_left == 0:
-                factor_right = choice((1, 10, 100)) * randint(1, 9)
-            elif factor_left < 10:
-                factor_right = 100 * randint(1, min(10//factor_left, 9))
-            elif factor_left < 100:
-                factor_right = choice((1, 10)) * randint(1, 9)
+            factor_left_mult = randint(1, 9)
+            factor_right_mult = randint(1, 9)
+
+            factor_right = factor_right_mult * factor_right_10mults[i]
+            if factor_right_list.count(factor_right) > 1: continue
+            factor_right_list.append(factor_right)
+
+            if factor_left_10mults[i] == None:
+                factor_left = 1
             else:
-                factor_right = randint(1, 10//(factor_left//100))
-            product = factor_left * factor_right
- 
-            # this is causing issues
-            # if comm_unique(a,b,None, variants) and 100 <= a*b <= 1000:
-            if [factor_left, factor_right, None] not in variants and (100 <= product <= 10000 or product == 0):
-                variants.append([factor_left, factor_right, None])
+                factor_left = factor_left_mult * factor_left_10mults[i]
+                if factor_left == 1: continue
+
+            if factor_left_list.count(factor_left) > 1: continue
+            factor_left_list.append(factor_left)
+
+            variant = [factor_left, factor_right, None]
+            if variant not in variants and factor_left * factor_right <= 10000:
+                variants.append(variant)
                 break
- 
     shuffle(variants)
     return variants, 'C'
-    # factor_left_mults = [1] * 4 + [10] * 3 + [100] * 4
-    # shuffle(factor_left_mults)
-    # factor_left_mults = factor_left_mults[:10]
-    # factor_right_mults = []
+
+    # ''' NOTE: 
+    # currently no restrictions on numbers of 100 mults, 10 mults, ...
  
-    # for flm in factor_left_mults:
+    # ALSO
+    # problem with unique variants
+    # '''
+    # variants = []
+    # # for last entry, a in hundreds or ones could cause uniqueness issues
+    # factor_left_mults = [1] * 3 + [10] * 3 + [100] * 4
+    # shuffle(factor_left_mults)
+    # factor_left_mults = factor_left_mults[:8]
+    # factor_left_list = [0, 1] + [choice(factor_left_mults) * i for i in range(2, 10)]
+    # # while True:
+    # #     factor_left = choice((1, 10, 100)) * randint(1, 9)
+    # #     if factor_left not in factor_left_list:
+    # #         factor_left_list.append(factor_left)
+    # #         break
+ 
+    # for factor_left in factor_left_list:
+    #     while True:
+    #         if factor_left == 0:
+    #             factor_right = choice((1, 10, 100)) * randint(1, 9)
+    #         elif factor_left < 10:
+    #             factor_right = 100 * randint(1, min(10//factor_left, 9))
+    #         elif factor_left < 100:
+    #             factor_right = choice((1, 10)) * randint(1, 9)
+    #         else:
+    #             factor_right = randint(1, 10//(factor_left//100))
+    #         product = factor_left * factor_right
+ 
+    #         # this is causing issues
+    #         # if comm_unique(a,b,None, variants) and 100 <= a*b <= 1000:
+    #         if [factor_left, factor_right, None] not in variants and (100 <= product <= 10000 or product == 0):
+    #             variants.append([factor_left, factor_right, None])
+    #             break
+ 
+    # shuffle(variants)
+    # return variants, 'C'
+    # # factor_left_mults = [1] * 4 + [10] * 3 + [100] * 4
+    # # shuffle(factor_left_mults)
+    # # factor_left_mults = factor_left_mults[:10]
+    # # factor_right_mults = []
+ 
+    # # for flm in factor_left_mults:
  
 def DIV7():
-    '''NOTE: didn't bother with quotient list
+    '''NOTE: 
+    didn't bother with quotient list
     looks completely new :( '''
     variants = []
     divisor_list = [choice((1, 10)) * i for i in range(1, 10)]
@@ -657,7 +684,7 @@ def DIV7():
             if not (divisor > 10 or dividend/divisor > 10):
                 continue
  
-            if [dividend, divisor, None] not in variants and dividend <= 10000:
+            if [dividend, divisor, None] not in variants:# and dividend <= 10000:
                 variants.append([dividend, divisor, None])
                 break
  
@@ -735,28 +762,35 @@ def SUB8():
     return variants, 'ABC'
  
 def MUL8():
+    ''' NOTE: GOOD'''
+    # variants = []
+    # factor_left_list = [choice((1, 10, 100)) * i for i in range(10)]
+    # for factor_left in factor_left_list:
+    #     while True:
+    #         if factor_left == 0:
+    #             factor_right = choice((1, 10, 100)) * randint(1, 9)
+    #         elif factor_left < 10:
+    #             factor_right = 100 * randint(1, min(10//factor_left, 9))
+    #         elif factor_left < 100:
+    #             factor_right = choice((1, 10)) * randint(1, 9)
+    #         else:
+    #             factor_right = randint(1, 10//(factor_left//100))
+    #         product = factor_left * factor_right
+ 
+    #         # this is causing issues
+    #         # if comm_unique(a,b,None, variants) and 100 <= a*b <= 1000:
+    #         if [factor_left, factor_right, product] not in variants:
+    #             if 100 <= product <= 1000 or factor_left == 0:
+    #                 variants.append([factor_left, factor_right, product])
+    #                 break
+ 
+    # shuffle(variants)
+    # return variants, 'AB'
+
     variants = []
-    factor_left_list = [choice((1, 10, 100)) * i for i in range(10)]
-    for factor_left in factor_left_list:
-        while True:
-            if factor_left == 0:
-                factor_right = choice((1, 10, 100)) * randint(1, 9)
-            elif factor_left < 10:
-                factor_right = 100 * randint(1, min(10//factor_left, 9))
-            elif factor_left < 100:
-                factor_right = choice((1, 10)) * randint(1, 9)
-            else:
-                factor_right = randint(1, 10//(factor_left//100))
-            product = factor_left * factor_right
- 
-            # this is causing issues
-            # if comm_unique(a,b,None, variants) and 100 <= a*b <= 1000:
-            if [factor_left, factor_right, product] not in variants:
-                if 100 <= product <= 1000 or factor_left == 0:
-                    variants.append([factor_left, factor_right, product])
-                    break
- 
-    shuffle(variants)
+    missing_result_variants, _ = MUL7()
+    for variant in missing_result_variants:
+        variants.append([variant[0], variant[1], variant[0] * variant[1]])
     return variants, 'AB'
  
 def DIV8():
@@ -922,40 +956,50 @@ def SUB9():
     return variants, 'ABC'
  
 def MUL9():
-    # variants = mult_variants_from_list([11, 12, 15, 25], minimum=2, low=2)
-    # variants = remove_indices('ABC', variants)
+    '''NOTE:GOOD'''
     variants = []
-    temp = [11, 12, 15, 25]
-    shuffle(temp)
-    factor_right_list = temp * 2 + temp[:2]
-    for factor_right in factor_right_list:
+    mult_pow10_arr = [  [0,2,2],
+                        [2,3,0],
+                        [2,0,0]]
+    factor_left_10mults, factor_right_10mults = satisfy_pow10_table(mult_pow10_arr)
+
+    for factor10_left, factor10_right in zip(factor_left_10mults, factor_right_10mults):
         while True:
-            factor_left = randint(2, 10)
-            variant = [factor_left, factor_right, factor_left*factor_right]
-            if variant not in variants:
+            factor_left = randint(1, 9) * 10 * factor10_left
+            factor_right = randint(1, 9) * 10 * factor10_right
+            product = factor_left * factor_right
+
+            variant = [factor_left, factor_right, product]
+            possibly_commuted = comm_unique(*variant, variants)
+            if possibly_commuted and 1000 < product < 100000:
                 variants.append(variant)
                 break
+
     return variants, 'ABC'
  
 def DIV9():
+    '''NOTE:GOOD'''
     variants = []
-    divisor_list = repeat_shuffle_fill([11, 12, 15, 25], 2) #repeat_list([11, 12, 15, 25], 2)
-    same = True
-    for divisor in divisor_list:
+    div_pow10_arr = [   [0,0,1,1],
+                        [0,1,1,1],
+                        [1,1,1,0],
+                        [1,1,0,0]]
+    dividend_10mults, divisor_10mults = satisfy_pow10_table(div_pow10_arr)
+
+    divisor_list = []
+    for dvd_10mult, dvs_10mult in zip(dividend_10mults, divisor_10mults):
         while True:
-            if same:
-                quotient = randint(1, 10)
-            else:
-                quotient = randint(2, 10)
-            if quotient == 1:
-                same = False
-            variant = [divisor * quotient, divisor, quotient]
- 
-            if variant not in variants:
+            divisor = dvs_10mult * randint(1, 9)
+            dividend = divisor * dvd_10mult * randint(1, 9)
+            quotient = dividend // divisor
+
+            variant = [dividend, divisor, None]
+            if all((variant not in variants, 1000 < dividend < 100000, quotient != 1, divisor not in divisor_list)):
                 variants.append(variant)
+                divisor_list.append(divisor)
                 break
- 
-    return variants, 'AC'
+    
+    return variants, 'C'
  
 def ADD10():
     ''' NOTE: GOOD
@@ -1073,18 +1117,10 @@ def ADD10():
     shuffle(variants)
     return variants, 'ABC'
  
+# didn't add min_before_repeat structure from 9. was this necessary?
 def SUB10():
-    # while len(variants) != 10:
-    #     minuend = choice((100, 1000)) * randint(10, 99)
-    #     subtrahend = choice((10, 100, 1000) if minuend//1000 else (10, 100)) * randint(1, 99)
- 
-    #     if not ((subtrahend%1000)//100 > (minuend%1000)//100) or not ((subtrahend%100)//10 > (minuend%100)//10):
-    #         continue
- 
-    #     if [minuend, subtrahend, None] not in variants and minuend - subtrahend > 1000:
-    #         variants.append([minuend, subtrahend, None])
- 
-    # first variant s_huns > 10
+    '''NOTE: GOOD'''
+    # at least one variant s_huns > 10
     variants = []
     m_huns = randint(12, 20)
     m_tens = randint(0, 8)
@@ -1109,64 +1145,39 @@ def SUB10():
     return variants, 'ABC'
  
 def MUL10():
-    ''' NOTE:
-    quotient is less than 1000
-    '''
+    '''NOTE:GOOD'''
     variants = []
-    factor1_list = [randint(2, 9) * item for item in repeat_list([10, 100, 1000], 2)]
- 
-    for factor1 in factor1_list:
+
+    factor_right_list = repeat_shuffle_fill([11,12,15,25],2)
+    for factor_right in factor_right_list:
         while True:
-            factor2 = 10 * randint(2, 9)
-            product = factor1 * factor2
- 
-            possibly_commuted = comm_unique(factor1, factor2, product, variants)
-            if possibly_commuted and product < 1000000:
-                variants.append(possibly_commuted)
+            factor_left = randint(2, 10)
+
+            variant = [factor_left, factor_right, factor_left*factor_right]
+            if variant not in variants:
+                variants.append(variant)
                 break
- 
     return variants, 'ABC'
  
 def DIV10():
-    ''' NOTE:
-    I added restrictions to match examples
-    '''
+    '''NOTE:GOOD'''
     variants = []
-    divisor_list = [randint(2, 9) * item for item in repeat_list([1, 10, 100, 1000], 2)]
- 
+    divisor_list = repeat_shuffle_fill([11, 12, 15, 25], 2) #repeat_shuffle_fill([11, 12, 15, 25], 2)
+    same = True
     for divisor in divisor_list:
         while True:
-            dividend = divisor * choice((1, 10, 100)) * randint(2, 9)
-            quotient = dividend//divisor
+            quotient = randint(1 if same else 2, 10)
+            if quotient == 1: same = False
+
+            variant = [divisor * quotient, divisor, quotient]
+            if variant not in variants:
+                variants.append(variant)
+                break
  
-            if [dividend, divisor, quotient] not in variants:
-                if quotient <= 10000 and 100 < dividend < 1000000:
-                    variants.append([dividend, divisor, dividend//divisor])
-                    break
- 
-    return variants, 'ABC'
- 
-    # tps = [1, 10, 100, 1000]
-    # mult10_divisor_list = [1] * 2 + [10] * 3 + [100] + 3 + [1000] * 2
-    # mult10_dividend_list = tps[2:] + tps[1:] + tps[:3] + tps[:2]
-    # #mult_divisor_list = [randint(1, 9)] + list(range(1, 10))
- 
-    # # want some randomness but cant shuffle mult lists
-    # mult_index_list = list(range(10))
-    # shuffle(mult_index_list)
- 
-    # mult_divisor_list = []
-    # for mult in mult10_divisor_list:
-         
- 
-    # while mult_index_list:
-    #     index = mult10_index_list.pop()
-    #     mult10_divisor = mult10_divisor_list[index]
-    #     mult10_dividend = mult10_dividend_list[index]
-    #     mult_divisor = mult_divisor_list.pop()
-    #     # need to use all items in mult_index_list
-    #     while True:
-    #         divisor = mult_divisor * mult10_divisor
+    if variants.count(1) > 1:
+        print('DIV9 has too many 1s!!!')
+
+    return variants, 'AC'
  
 def level_maker(level, operation):
     '''operation should be a string'''
@@ -1184,6 +1195,32 @@ def level_maker(level, operation):
 # are there repeated values?
 # print(any(test.count(x) > 1 for x in test))
  
+def check(lvl, missing_index, operation, sep):
+    ## CHECK length
+    if len(lvl) != 10:
+        print(sep + ' length issue!!!')
+
+    ## CHECK UNIQUE VARIANTS
+    if not check_unique(lvl):
+        print(sep + ' variant uniqueness issue!!!')
+
+    for variant in lvl:
+        ## CHECK [0, 0, 0]
+        if variant[:2].count(0) > 1:
+            print(sep + ' too many AB zeros!!!')
+
+        ## CHECK negative result
+        if operation == '-' and (variant[0] - variant[1] < 0):
+            print(sep + ' negative result!!!')
+    
+    ## CHECK one None index
+    lvl = remove_indices(missing_index, lvl)
+    for variant in lvl:
+        if variant.count(None) != 1:
+            print(sep + ' number of None issue!!!')
+
+    return lvl
+
 def make_output():
     output = open('output.txt', 'w')
     # completed =
@@ -1198,33 +1235,10 @@ def make_output():
             while len(contents) < 10:
                 # the 10 variants should be unique
                 # how unique?
- 
                 lvl, missing_index = level_maker(level, operation)
- 
-                ## CHECK length
-                if len(lvl) != 10:
-                    print(sep + ' length issue!!!')
- 
-                ## CHECK UNIQUE VARIANTS
-                if not check_unique(lvl):
-                    print(sep + ' variant uniqueness issue!!!')
- 
-                for variant in lvl:
-                    ## CHECK [0, 0, 0]
-                    if variant[:2].count(0) > 1:
-                        print(sep + ' too many AB zeros!!!')
 
-                    ## CHECK negative result
-                    if operation == '-' and (variant[0] - variant[1] < 0):
-                        print(sep + ' negative result!!!')
- 
-                ## CHECK one None index
-                lvl = remove_indices(missing_index, lvl)
-                for variant in lvl:
-                    if variant.count(None) != 1:
-                        print(sep + ' number of None issue!!!')
-                 
-                     
+                # check for problems
+                lvl = check(lvl, missing_index, operation, sep)
                 if str(lvl) not in contents:
                     if len(lvl) != 10:
                         print('Level ' + sep + ' length is ' + str(len(lvl)))
@@ -1232,5 +1246,5 @@ def make_output():
                     output.write(str(lvl) + '\n')
             output.write('\n')
     output.close()
- 
+
 make_output()
