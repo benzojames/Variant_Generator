@@ -21,7 +21,9 @@ def ADD1():
     return variants, 'AB'
  
 def SUB1():
-    ''' NOTE: 0 - 0 is currently possible '''
+    ''' NOTE:
+    0 - 0 is currently possible
+    '''
     variants = []
     # subtrahend_list = list(range(10))
     # minuend_list = [randint(subtrahend, 10) for subtrahend in subtrahend_list]
@@ -32,22 +34,12 @@ def SUB1():
     # variants = remove_indices('ABC', variants)
     CZeros = 2
     for subtrahend in range(10):
-        while True:
-            minuend = randint(subtrahend + (0 if CZeros else 1), 10)
- 
-            # avoid [0, 0, 0]
-            if minuend == 0:
-                continue
- 
-            difference = minuend - subtrahend
-            if difference == 0:
-                CZeros -= 1
-            variant = [minuend, subtrahend, difference]
- 
-            # avoid repitition
-            if variant not in variants:
-                variants.append([minuend, subtrahend, difference])
-                break
+        # possible this will cause a repetition
+        minuend = randint(subtrahend + (0 if CZeros else 1), 10)
+        difference = minuend - subtrahend
+        if difference == 0:
+            CZeros -= 1
+        variants.append([minuend, subtrahend, difference])
     shuffle(variants)
     return variants, 'ABC'
  
@@ -103,7 +95,7 @@ def DIV1():
     return list(zip(dividend_list, divisor_list, [None] * 10)), 'C'
  
 def ADD2():
-    ''' GOOD
+    '''
     A in [0, 20]
     B in [0, 20]
     A + B in [11, 20]
@@ -185,6 +177,7 @@ def MUL2():
             variants.append([factor_left_list[i], factor_right_list[i], None])
     return variants, 'C'
  
+ 
 def DIV2():
     variants = []
     #divisor_list = repeat_list([4, 8], 3)
@@ -201,19 +194,17 @@ def DIV2():
     return variants, 'C'
  
 def ADD3():
-    ''' GOOD '''
     variants = []
     zeros = 2
     floor = 0
  
     while len(variants) != 10:
-        # could be (1, 9)
         addend1 = 10 * randint(2, 9)
         addend2 = choice((randint(floor, 9), 10 * randint(1, 10 - addend1 / 10)))
         summation = addend1 + addend2
  
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-        if possibly_commuted and 20 < summation < 100:
+        if possibly_commuted:
             variants.append(possibly_commuted)
             if addend2 == 0:
                 zeros -= 1
@@ -265,7 +256,7 @@ def DIV3():
     return variants, 'C'
  
 def ADD4():
-    ''' NOTE: GOOD
+    ''' NOTE:
     Charles said to trust examples over ALGO, but ALGO is quite specific
     about no b = 0 and b = 0 in one example.
  
@@ -276,7 +267,7 @@ def ADD4():
     results are multiples of 10
     '''
     variants = []
-    # see smallest addend at most twice
+    # see small addend at most twice
     addend1_list = list(range(1, 10))*2
     shuffle(addend1_list)
  
@@ -292,7 +283,7 @@ def ADD4():
                 summation = addend1 + addend2
  
                 possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-                if possibly_commuted and summation%10 == 0 and 20 < summation < 100:
+                if possibly_commuted:
                     variants.append(possibly_commuted)
                     break
  
@@ -351,7 +342,6 @@ def DIV4():
     return variants, 'C'
  
 def ADD5():
-    ''' NOTE: GOOD '''
     variants = []
     while len(variants) != 10:
         addend1 = randint(2, 9)
@@ -359,7 +349,7 @@ def ADD5():
         summation = addend1 + addend2
          
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-        if possibly_commuted and 20 < summation < 100 and summation%10 != 0:
+        if possibly_commuted:
             variants.append(possibly_commuted)
      
     return variants, 'ABC'
@@ -451,7 +441,6 @@ def DIV5():
     #     variants.append([dividend, divisor, None])
  
 def ADD6():
-    ''' NOTE: GOOD '''
     variants = []
     # this time zeros are found in one-units of a 2 digit number twice
     zeros = 2
@@ -464,7 +453,7 @@ def ADD6():
             addend2 += randint(1, 10 - addend1%10)
  
         possibly_commuted = comm_unique(addend1, addend2, summation, variants)
-        if possibly_commuted and 20 < summation < 100:
+        if possibly_commuted:
             variants.append(possibly_commuted)
             if not addend2%10:
                 zeros -= 1
@@ -550,16 +539,13 @@ def DIV6():
     return variants, 'AB'
  
 def ADD7():
-    ''' NOTE: GOOD '''
     variants = []
     while len(variants) != 10:
         addend_left = 10 * randint(1, 7) + randint(1, 9)
         addend_right = 10 * randint(1, 8 - addend_left//10) + randint(10 - addend_left%10, 9)
-        summation = addend_left + addend_right
  
-        variant = [addend_left, addend_right, summation]
-        if comm_unique(addend_left, addend_right, summation, variants) and 30 < summation < 200:
-            variants.append(variant)
+        if comm_unique(addend_left, addend_right, addend_left + addend_right, variants):
+            variants.append([addend_left, addend_right, addend_left + addend_right])
  
     return variants, 'ABC'
  
@@ -670,27 +656,29 @@ def DIV7():
     return variants, 'C'
  
 def ADD8():
-    '''NOTE: not sure '''
+    '''NOTE: Didn't bother '''
     variants = []
-    # will satisfy in (100, 1000)
-    variants.append(comm_choice(100 * randint(1, 9), randint(1, 9), None))
+    addend1 = 100 * randint(1, 9)
+    addend2 = randint(1, 9)
+    variants.append(comm_choice(addend1, addend2, None))
  
     while True:
-        # will satisfy in (100, 1000)
-        possibly_commuted = comm_unique(100 * randint(1, 9), randint(1, 9), None, variants)
+        addend1 = 100 * randint(1, 9)
+        addend2 = randint(1, 9)
+        possibly_commuted = comm_unique(addend1, addend2, None, variants)
         if possibly_commuted:
             variants.append(possibly_commuted)
             break
  
     while len(variants) != 10:
-        addend1 = choice((10, 100)) * randint(1, 9)
+        addend1 = 100 * randint(1, 10)
         addend2 = choice((10, 100)) * randint(1, 9)
         if addend2 < 100:
             addend2 += randint(1, 9)
         summation = addend1 + addend2
  
         possibly_commuted = comm_unique(addend1, addend2, None, variants)
-        if all((100 < summation < 1000, addend2 < addend1, possibly_commuted)):
+        if all((100 < summation <= 1000, addend2 < addend1, possibly_commuted)):
             variants.append(possibly_commuted)
  
     shuffle(variants)
@@ -778,13 +766,6 @@ def DIV8():
  
     shuffle(variants)
     return variants, 'AB'
- 
-def ADD9_variants_check():
-    return
-def ADD9variant_check(a, b, c):
-    # don't add 2 multiples of 100
-    if a%100 == 0 and b%100 == 0:
-        return False
  
 def ADD9():
     ''' NOTE
@@ -1170,20 +1151,10 @@ def make_output():
  
                 lvl, missing_index = level_maker(level, operation)
  
-                ## CHECK length
-                if len(lvl) != 10:
-                    print(sep + ' length issue!!!')
- 
                 ## CHECK UNIQUE VARIANTS
                 if not check_unique(lvl):
                     print(sep + ' variant uniqueness issue!!!')
  
-                ## CHECK [0, 0, 0]
-                for variant in lvl:
-                    if variant[:2].count(0) > 1:
-                        print(sep + ' too many AB zeros!!!')
- 
-                ## CHECK one None index
                 lvl = remove_indices(missing_index, lvl)
                 for variant in lvl:
                     if variant.count(None) != 1:
